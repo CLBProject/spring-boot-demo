@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-ftp="http://www.springframework.org/schema/integration/ftp"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+        http://www.springframework.org/schema/integration/ftp http://www.springframework.org/schema/integration/ftp/spring-integration-ftp.xsd">
+        
+<!--         <int:gateway service-interface="com.example.demo.PrinterGateway" default-request-channel="inputChannel" /> -->
+
+<!-- 		<int:channel id="inputChannel"> -->
+<!-- 			<int:queue capacity="10"/> -->
+<!-- 		</int:channel> -->
+		
+<!-- 		<bean class="com.example.demo.PrintService" id="printService"/> -->
+		
+<!-- 		<int:service-activator ref="printService" method="print" input-channel="inputChannel"> -->
+<!-- 			<int:poller fixed-rate="5" time-unit="SECONDS" max-messages-per-poll="2"/> -->
+<!-- 		</int:service-activator> -->
+		
+	<bean id="ftpSessionFactory"
+		class="org.springframework.integration.ftp.session.DefaultFtpSessionFactory">
+		<property name="host" value="192.168.99.100" />
+		<property name="port" value="21" />
+		<property name="username" value="admin" />
+		<property name="password" value="admin" />
+		<property name="clientMode" value="0"/>
+	    <property name="fileType" value="1"/>
+	    <property name="bufferSize" value="100000"/>
+	</bean>	
+		
+	<int:channel id="ftpChannel">
+	    <int:interceptors>
+	        <int:wire-tap channel="logger"/>
+	    </int:interceptors>
+	</int:channel>
+
+<int:logging-channel-adapter id="logger" level="DEBUG"/>
+	
+
+	<int-ftp:inbound-channel-adapter session-factory="ftpSessionFactory" 
+		local-directory="src/test/write"
+		channel="ftpChannel"
+		remote-file-separator="/"
+		remote-directory="/">
+		<int:poller fixed-rate="5000"></int:poller>
+	</int-ftp:inbound-channel-adapter>       
+	
+<!-- 	<int-ftp:inbound-channel-adapter session-factory="ftpSessionFactory"  -->
+<!-- 		local-directory="src/test/write" -->
+<!-- 		channel="ftpChannel" -->
+<!-- 		remote-directory="files" -->
+<!-- 		delete-remote-files="true"> -->
+<!-- 		<int:poller fixed-rate="5000"></int:poller> -->
+<!-- 	</int-ftp:inbound-channel-adapter>  -->
+
+	<int:service-activator ref="printService" method="printFile" input-channel="ftpChannel"></int:service-activator>
+	
+	<bean class="com.example.demo.PrintService" id="printService"/> 
+</beans>
