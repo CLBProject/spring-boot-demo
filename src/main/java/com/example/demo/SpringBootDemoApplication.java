@@ -23,6 +23,9 @@ public class SpringBootDemoApplication implements ApplicationRunner{
 	//@Autowired
 	//private PrinterGateway gateway;
 	
+	@Autowired
+	private FileWriterGateway gateway;
+	
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootDemoApplication.class, args);
 	}
@@ -40,6 +43,10 @@ public class SpringBootDemoApplication implements ApplicationRunner{
 		for(Future<Message<String>> future: futures) {
 			System.out.println(future.get().getPayload());
 		}*/
+		
+		//this.gateway.write("example.txt", "This is a test of the FTP outbound channel adapter");
+		//this.gateway.read("example.txt");
+		this.gateway.read("/");
 	}
 
 }
